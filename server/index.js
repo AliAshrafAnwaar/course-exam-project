@@ -1,5 +1,9 @@
-const express = require('express');
+require('dotenv').config();
 const winston = require('winston');
+const app = require('./src/app');
+const config = require('./src/config/app.config');
+const { testConnection } = require('./src/config/database');
+const { sequelize } = require('./src/models');
 
 // Configure logging
 const logger = winston.createLogger({
@@ -14,20 +18,30 @@ const logger = winston.createLogger({
   ]
 });
 
-if (process.env.NODE_ENV !== 'production') {
+if (config.nodeEnv !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.simple()
   }));
 }
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+// Make logger available globally
+global.logger = logger;
 
-app.get('/', (req, res) => {
-  logger.info('Root endpoint accessed');
-  res.json({ message: 'Server is running!' });
-});
+const startServer = async () => {
+  try {
+    // Test database connection
+    await testConnection();
+    logger.info('Database connection established');
 
-app.listen(PORT, () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
-});
+    // Start server
+    app.listen(config.port, () => {
+      logger.info(`Server running on http://localhost:${config.port}`);
+      logger.info(`Environment: ${config.nodeEnv}`);
+    });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -34,10 +34,10 @@ module.exports = {
 
     // Teacher permissions
     const teacherPerms = [
-      'course.create', 'course.read', 'course.update',
-      'chapter.create', 'chapter.read', 'chapter.update',
-      'question.create', 'question.read', 'question.update',
-      'exam.create', 'exam.read', 'exam.update', 'exam.generate'
+      'create_course', 'read_course', 'update_course',
+      'create_chapter', 'read_chapter', 'update_chapter',
+      'create_question', 'read_question', 'update_question',
+      'create_exam', 'read_exam', 'update_exam'
     ];
     teacherPerms.forEach(perm => {
       if (permMap[perm]) {
@@ -50,7 +50,7 @@ module.exports = {
     });
 
     // Student permissions
-    const studentPerms = ['course.read', 'chapter.read', 'exam.read'];
+    const studentPerms = ['read_course', 'read_chapter', 'read_exam'];
     studentPerms.forEach(perm => {
       if (permMap[perm]) {
         rolePermissions.push({

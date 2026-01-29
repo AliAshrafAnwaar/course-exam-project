@@ -1,13 +1,41 @@
 'use strict';
+const bcrypt = require('bcryptjs');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // Get teacher role ID
+    const roles = await queryInterface.sequelize.query(
+      `SELECT id FROM roles WHERE name = 'teacher'`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const teacherRoleId = roles[0]?.id || 2;
+
+    // Create a sample teacher user
+    const passwordHash = await bcrypt.hash('teacher123', 10);
+    await queryInterface.bulkInsert('users', [{
+      username: 'teacher1',
+      email: 'teacher@example.com',
+      password_hash: passwordHash,
+      full_name: 'John Teacher',
+      role_id: teacherRoleId,
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date()
+    }]);
+
+    // Get the user ID
+    const users = await queryInterface.sequelize.query(
+      `SELECT id FROM users WHERE username = 'teacher1'`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const teacherId = users[0].id;
+
     // Create sample course
     await queryInterface.bulkInsert('courses', [{
       name: 'Introduction to Programming',
       description: 'A beginner course covering programming fundamentals',
-      total_chapters: 3,
+      created_by: teacherId,
       created_at: new Date(),
       updated_at: new Date()
     }]);
@@ -21,9 +49,9 @@ module.exports = {
 
     // Create chapters
     await queryInterface.bulkInsert('chapters', [
-      { course_id: courseId, name: 'Variables and Data Types', chapter_number: 1, created_at: new Date(), updated_at: new Date() },
-      { course_id: courseId, name: 'Control Structures', chapter_number: 2, created_at: new Date(), updated_at: new Date() },
-      { course_id: courseId, name: 'Functions and Methods', chapter_number: 3, created_at: new Date(), updated_at: new Date() }
+      { course_id: courseId, chapter_number: 1, title: 'Variables and Data Types', created_at: new Date(), updated_at: new Date() },
+      { course_id: courseId, chapter_number: 2, title: 'Control Structures', created_at: new Date(), updated_at: new Date() },
+      { course_id: courseId, chapter_number: 3, title: 'Functions and Methods', created_at: new Date(), updated_at: new Date() }
     ]);
 
     // Get chapter IDs
@@ -148,9 +176,10 @@ module.exports = {
               choice_1: q.c1,
               choice_2: q.c2,
               choice_3: q.c3,
-              correct_choice: q.correct,
+              correct_answer: q.correct,
               difficulty: difficulty,
               objective: objective,
+              created_by: teacherId,
               created_at: new Date(),
               updated_at: new Date()
             });
@@ -166,5 +195,6 @@ module.exports = {
     await queryInterface.bulkDelete('questions', null, {});
     await queryInterface.bulkDelete('chapters', null, {});
     await queryInterface.bulkDelete('courses', null, {});
+    await queryInterface.bulkDelete('users', { email: 'teacher@example.com' }, {});
   }
 };
