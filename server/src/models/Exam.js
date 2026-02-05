@@ -21,7 +21,7 @@ const Exam = sequelize.define('Exam', {
   },
   created_by: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'users',
       key: 'id'
@@ -61,5 +61,18 @@ const Exam = sequelize.define('Exam', {
   timestamps: true,
   underscored: true
 });
+
+Exam.associate = (models) => {
+  Exam.belongsTo(models.User, { foreignKey: 'created_by', as: 'creator' });
+  Exam.belongsTo(models.Course, { foreignKey: 'course_id', as: 'course' });
+  Exam.hasMany(models.ExamChapterRequirement, { foreignKey: 'exam_id', as: 'chapterRequirements' });
+  Exam.belongsToMany(models.Question, { 
+    through: models.ExamQuestion, 
+    foreignKey: 'exam_id', 
+    otherKey: 'question_id',
+    as: 'questions' 
+  });
+  Exam.hasMany(models.ExamQuestion, { foreignKey: 'exam_id', as: 'examQuestions' });
+};
 
 module.exports = Exam;

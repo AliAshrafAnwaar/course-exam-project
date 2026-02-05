@@ -189,9 +189,115 @@ module.exports = {
     }
 
     await queryInterface.bulkInsert('questions', questions);
+
+    // Create sample exams
+    await queryInterface.bulkInsert('exams', [
+      {
+        course_id: courseId,
+        name: 'Introduction to Programming - Midterm',
+        total_questions: 12,
+        req_simple_count: 6,
+        req_difficult_count: 6,
+        req_reminding_count: 4,
+        req_understanding_count: 4,
+        req_creativity_count: 4,
+        created_by: teacherId,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        course_id: courseId,
+        name: 'Introduction to Programming - Final',
+        total_questions: 24,
+        req_simple_count: 12,
+        req_difficult_count: 12,
+        req_reminding_count: 8,
+        req_understanding_count: 8,
+        req_creativity_count: 8,
+        created_by: teacherId,
+        created_at: new Date(),
+        updated_at: new Date()
+      }
+    ]);
+
+    // Get exam IDs
+    const exams = await queryInterface.sequelize.query(
+      `SELECT id, name FROM exams WHERE created_by = ${teacherId}`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    // Create exam chapter requirements
+    const examChapterRequirements = [];
+    exams.forEach(exam => {
+      chapters.forEach(chapter => {
+        if (exam.name.includes('Midterm')) {
+          // Midterm: 4 questions per chapter
+          examChapterRequirements.push({
+            exam_id: exam.id,
+            chapter_id: chapter.id,
+            required_question_count: 4,
+            created_at: new Date(),
+            updated_at: new Date()
+          });
+        } else {
+          // Final: 8 questions per chapter
+          examChapterRequirements.push({
+            exam_id: exam.id,
+            chapter_id: chapter.id,
+            required_question_count: 8,
+            created_at: new Date(),
+            updated_at: new Date()
+          });
+        }
+      });
+    });
+
+    await queryInterface.bulkInsert('exam_chapter_requirements', examChapterRequirements);
+
+    // Get all question IDs for assignment
+    const allQuestions = await queryInterface.sequelize.query(
+      `SELECT id, difficulty, objective FROM questions WHERE created_by = ${teacherId}`,
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    // Assign questions to exams
+    const examQuestions = [];
+    const midtermExam = exams.find(e => e.name.includes('Midterm'));
+    const finalExam = exams.find(e => e.name.includes('Final'));
+
+    if (midtermExam) {
+      // Midterm: Select 12 questions (4 per chapter, balanced difficulty/objective)
+      const midtermQuestions = allQuestions.slice(0, 12);
+      midtermQuestions.forEach((question, index) => {
+        examQuestions.push({
+          exam_id: midtermExam.id,
+          question_id: question.id,
+          question_order: index + 1,
+          created_at: new Date()
+        });
+      });
+    }
+
+    if (finalExam) {
+      // Final: Select 24 questions (8 per chapter, balanced difficulty/objective)
+      const finalQuestions = allQuestions.slice(12, 36);
+      finalQuestions.forEach((question, index) => {
+        examQuestions.push({
+          exam_id: finalExam.id,
+          question_id: question.id,
+          question_order: index + 1,
+          created_at: new Date()
+        });
+      });
+    }
+
+    await queryInterface.bulkInsert('exam_questions', examQuestions);
   },
 
   async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete('exam_questions', null, {});
+    await queryInterface.bulkDelete('exam_chapter_requirements', null, {});
+    await queryInterface.bulkDelete('exams', null, {});
     await queryInterface.bulkDelete('questions', null, {});
     await queryInterface.bulkDelete('chapters', null, {});
     await queryInterface.bulkDelete('courses', null, {});

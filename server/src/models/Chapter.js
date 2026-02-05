@@ -15,9 +15,10 @@ const Chapter = sequelize.define('Chapter', {
       key: 'id'
     }
   },
-  chapter_number: {
+  chapterNumber: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    field: 'chapter_number'
   },
   title: {
     type: DataTypes.STRING(255),
@@ -34,5 +35,11 @@ const Chapter = sequelize.define('Chapter', {
     }
   ]
 });
+
+Chapter.associate = (models) => {
+  Chapter.belongsTo(models.Course, { foreignKey: 'course_id', as: 'course' });
+  Chapter.hasMany(models.Question, { foreignKey: 'chapter_id', as: 'questions' });
+  Chapter.hasMany(models.ExamChapterRequirement, { foreignKey: 'chapter_id', as: 'examRequirements' });
+};
 
 module.exports = Chapter;

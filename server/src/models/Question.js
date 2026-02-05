@@ -20,15 +20,15 @@ const Question = sequelize.define('Question', {
     allowNull: false
   },
   choice_1: {
-    type: DataTypes.STRING(500),
+    type: DataTypes.TEXT,
     allowNull: false
   },
   choice_2: {
-    type: DataTypes.STRING(500),
+    type: DataTypes.TEXT,
     allowNull: false
   },
   choice_3: {
-    type: DataTypes.STRING(500),
+    type: DataTypes.TEXT,
     allowNull: false
   },
   correct_answer: {
@@ -49,7 +49,7 @@ const Question = sequelize.define('Question', {
   },
   created_by: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'users',
       key: 'id'
@@ -60,5 +60,17 @@ const Question = sequelize.define('Question', {
   timestamps: true,
   underscored: true
 });
+
+Question.associate = (models) => {
+  Question.belongsTo(models.User, { foreignKey: 'created_by', as: 'creator' });
+  Question.belongsTo(models.Chapter, { foreignKey: 'chapter_id', as: 'chapter' });
+  Question.belongsToMany(models.Exam, { 
+    through: models.ExamQuestion, 
+    foreignKey: 'question_id', 
+    otherKey: 'exam_id',
+    as: 'exams' 
+  });
+  Question.hasMany(models.ExamQuestion, { foreignKey: 'question_id', as: 'examQuestions' });
+};
 
 module.exports = Question;

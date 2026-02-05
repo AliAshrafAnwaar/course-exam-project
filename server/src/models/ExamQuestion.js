@@ -2,9 +2,14 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const ExamQuestion = sequelize.define('ExamQuestion', {
-  exam_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true
+  },
+  exam_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
     references: {
       model: 'exams',
       key: 'id'
@@ -12,7 +17,7 @@ const ExamQuestion = sequelize.define('ExamQuestion', {
   },
   question_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
+    allowNull: false,
     references: {
       model: 'questions',
       key: 'id'
@@ -28,5 +33,10 @@ const ExamQuestion = sequelize.define('ExamQuestion', {
   underscored: true,
   updatedAt: false
 });
+
+ExamQuestion.associate = (models) => {
+  ExamQuestion.belongsTo(models.Exam, { foreignKey: 'exam_id', as: 'exam' });
+  ExamQuestion.belongsTo(models.Question, { foreignKey: 'question_id', as: 'question' });
+};
 
 module.exports = ExamQuestion;

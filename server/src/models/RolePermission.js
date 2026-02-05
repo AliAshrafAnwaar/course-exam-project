@@ -2,9 +2,14 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const RolePermission = sequelize.define('RolePermission', {
-  role_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true
+  },
+  role_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
     references: {
       model: 'roles',
       key: 'id'
@@ -12,7 +17,7 @@ const RolePermission = sequelize.define('RolePermission', {
   },
   permission_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
+    allowNull: false,
     references: {
       model: 'permissions',
       key: 'id'
@@ -24,5 +29,9 @@ const RolePermission = sequelize.define('RolePermission', {
   underscored: true,
   updatedAt: false
 });
+
+RolePermission.associate = (models) => {
+  // Junction table - no additional associations needed
+};
 
 module.exports = RolePermission;

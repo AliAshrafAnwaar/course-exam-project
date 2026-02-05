@@ -32,12 +32,12 @@ module.exports = {
       });
     });
 
-    // Teacher permissions
+    // Teacher permissions (CRUD on their own resources)
     const teacherPerms = [
-      'create_course', 'read_course', 'update_course',
-      'create_chapter', 'read_chapter', 'update_chapter',
-      'create_question', 'read_question', 'update_question',
-      'create_exam', 'read_exam', 'update_exam'
+      'create_course', 'read_course', 'update_course', 'delete_course',
+      'create_chapter', 'read_chapter', 'update_chapter', 'delete_chapter',
+      'create_question', 'read_question', 'update_question', 'delete_question',
+      'create_exam', 'read_exam', 'update_exam', 'delete_exam'
     ];
     teacherPerms.forEach(perm => {
       if (permMap[perm]) {

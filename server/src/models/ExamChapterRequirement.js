@@ -40,4 +40,9 @@ const ExamChapterRequirement = sequelize.define('ExamChapterRequirement', {
   ]
 });
 
+ExamChapterRequirement.associate = (models) => {
+  ExamChapterRequirement.belongsTo(models.Exam, { foreignKey: 'exam_id', as: 'exam' });
+  ExamChapterRequirement.belongsTo(models.Chapter, { foreignKey: 'chapter_id', as: 'chapter' });
+};
+
 module.exports = ExamChapterRequirement;

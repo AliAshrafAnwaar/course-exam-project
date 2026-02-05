@@ -70,4 +70,11 @@ User.prototype.toJSON = function() {
   return values;
 };
 
+User.associate = (models) => {
+  User.belongsTo(models.Role, { foreignKey: 'role_id', as: 'role' });
+  User.hasMany(models.Course, { foreignKey: 'created_by', as: 'courses' });
+  User.hasMany(models.Question, { foreignKey: 'created_by', as: 'questions' });
+  User.hasMany(models.Exam, { foreignKey: 'created_by', as: 'exams' });
+};
+
 module.exports = User;
